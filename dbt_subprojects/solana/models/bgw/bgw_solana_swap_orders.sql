@@ -28,7 +28,7 @@ with swap as (
 ,jup as (
     select tx_id, a.account ref
     from (
-        select tx_id, account_arguments from {{ source('solana', 'instruction_calls') }} a
+        select tx_id, account_arguments from {{ source('solana','instruction_calls') }} a
         where executing_account = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
         {% if is_incremental() %}
         AND {{ incremental_predicate('a.block_time') }}
@@ -36,7 +36,7 @@ with swap as (
         ) a 
     cross join (
         select account_arguments[4] account
-        from {{ source('solana', 'instruction_calls') }} a
+        from {{ source('solana','instruction_calls') }} a
         where executing_account = 'REFER4ZgmyYx9c6He5XfaTMiGfdLwRnkV4RPp9t9iF3'
         and contains(account_arguments, '5u7y9do39ez9TRX1PwTyiTGPCdKBw2HCXgpnRVdic1EU') = true
         and cardinality(account_arguments) > 4
@@ -51,7 +51,7 @@ with swap as (
     select
         tx_id, executing_account ref
     from
-        {{ source('solana', 'instruction_calls') }} a
+        {{ source('solana','instruction_calls') }} a
     where
         executing_account = '3jGqysJ7RseXMvi7finPmgEBFnvgafVjVAZ1eUBXjA7b'
         {% if is_incremental() %}
@@ -63,7 +63,7 @@ with swap as (
 select 
     a.tx_id, trade_source, blockchain, block_time, date(block_time) block_date
     ,trader_id, amount_usd, coalesce(a.trade_souce,swap.ref,jup.ref,bridge.ref) ref
-from {{ source('dex_solana', 'trades') }} a 
+from {{ ref('dex_solana_trades') }} a 
 left join swap
 on a.tx_id = swap.id
 left join jup
